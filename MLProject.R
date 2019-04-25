@@ -1,20 +1,26 @@
 #library(tidyverse)
 #install.packages("tidyverse")
+
+columnNames <- c(
+  "edibility", "cap_shape", "cap_surface", 
+  "cap_color", "bruises", "odor", 
+  "gill_attachement", "gill_spacing", "gill_size", 
+  "gill_color", "stalk_shape", "stalk_root", 
+  "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
+  "stalk_color_below_ring", "veil_type", "veil_color", 
+  "ring_number", "ring_type", "spore_print_color", 
+  "population", "habitat")
+
+#include dataset from disk
 mushroom <- read.table("agaricus-lepiota.data",
                        sep = ",",
                        na.strings = "?",
                        colClasses = NA,
                        header = FALSE,
-                       col.names=c(
-                         "edibility", "cap_shape", "cap_surface", 
-                         "cap_color", "bruises", "odor", 
-                         "gill_attachement", "gill_spacing", "gill_size", 
-                         "gill_color", "stalk_shape", "stalk_root", 
-                         "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-                         "stalk_color_below_ring", "veil_type", "veil_color", 
-                         "ring_number", "ring_type", "spore_print_color", 
-                         "population", "habitat"
-                       )) # there are missing value so it gets warning
+                       col.names= columnNames
+                       ) # there are missing value so it gets warning
+
+head(mushroom) # without numeric values, pure non preparing
 
 ## categoric to numeric without target
 mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
@@ -47,11 +53,21 @@ Mode <- function (x, na.rm) {
   if (length(xmode) > 1) xmode <- ">1 mode"
   return(xmode)
 }
+
 for (var in 1:ncol(mushroom)) {
     mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
 }
 
 sum(is.na(mushroom$stalk_root))   
+
+head(mushroom)
+
+#normalize integer values
+normFunc <- function(x){(as.integer(x)-mean(as.integer(x), na.rm = T))/sd(as.integer(x), na.rm = T)}
+mushroom[2:23] <- apply(mushroom[2:23], 2, normFunc)
+
+head(mushroom)
+
 library(ggplot2)
 ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
   geom_jitter(alpha = 0.5) + 
