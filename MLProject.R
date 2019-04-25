@@ -40,7 +40,17 @@ mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
 mushroom$population <- as.numeric(mushroom$population)
 mushroom$habitat <- as.numeric(mushroom$habitat)
 
-mushroom$stalk_root <- as.numeric (mushroom$stalk_root)
+#replace NA values to columns mode
+Mode <- function (x, na.rm) {
+  xtab <- table(x)
+  xmode <- names(which(xtab == max(xtab)))
+  if (length(xmode) > 1) xmode <- ">1 mode"
+  return(xmode)
+}
+for (var in 1:ncol(mushroom)) {
+    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
+}
+
 sum(is.na(mushroom$stalk_root))   
 library(ggplot2)
 ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
