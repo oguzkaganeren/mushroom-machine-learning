@@ -15,21 +15,30 @@ mushroom <- read.table("agaricus-lepiota.data",
                          "ring_number", "ring_type", "spore_print_color", 
                          "population", "habitat"
                        )) # there are missing value so it gets warning
-#mushroom <- read_csv("agaricus-lepiota.data", col_names = FALSE) # there are missing value so it gets warning
-#glimpse(mushroom) # This is like a transposed version of print()
-# Rename the variables
-#colnames(mushroom) <- c("edibility", "cap_shape", "cap_surface", 
-#                        "cap_color", "bruises", "odor", 
-#                        "gill_attachement", "gill_spacing", "gill_size", 
-#                        "gill_color", "stalk_shape", "stalk_root", 
-#                        "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-#                        "stalk_color_below_ring", "veil_type", "veil_color", 
-#                        "ring_number", "ring_type", "spore_print_color", 
-#                        "population", "habitat")
 
-# Defining the levels for the categorical variables 
-## We make each variable as a factor
-#mushroom <- mushroom %>% map_df(function(.x) as.factor(.x))
+## categoric to numeric without target
+mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
+mushroom$cap_surface <- as.numeric(mushroom$cap_surface)
+mushroom$cap_color <- as.numeric(mushroom$cap_color)
+mushroom$bruises <- as.numeric(mushroom$bruises)
+mushroom$odor <- as.numeric(mushroom$odor)
+mushroom$gill_attachement <- as.numeric(mushroom$gill_attachement)
+mushroom$gill_spacing <- as.numeric(mushroom$gill_spacing)
+mushroom$gill_size <- as.numeric(mushroom$gill_size)
+mushroom$gill_color <- as.numeric(mushroom$gill_color)
+mushroom$stalk_shape <- as.numeric(mushroom$stalk_shape)
+mushroom$stalk_root <- as.numeric(mushroom$stalk_root)
+mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
+mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
+mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
+mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
+mushroom$veil_type <- as.numeric(mushroom$veil_type)
+mushroom$veil_color <- as.numeric(mushroom$veil_color)
+mushroom$ring_number <- as.numeric(mushroom$ring_number)
+mushroom$ring_type <- as.numeric(mushroom$ring_type)
+mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
+mushroom$population <- as.numeric(mushroom$population)
+mushroom$habitat <- as.numeric(mushroom$habitat)
 
 mushroom$stalk_root <- as.numeric (mushroom$stalk_root)
 sum(is.na(mushroom$stalk_root))   
