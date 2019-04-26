@@ -58,13 +58,15 @@ for (var in 1:ncol(mushroom)) {
     mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
 }
 
-sum(is.na(mushroom$stalk_root))   
-
+sum(is.na(mushroom$veil_type))   
+unique(mushroom$veil_type)
+#there is one unique values of veil_type, we can remove this column in our dataset.
+mushroom <- subset(mushroom, select = -c(17)) #17 is index of veil_type
 head(mushroom)
 
 #normalize integer values
 normFunc <- function(x){(as.integer(x)-mean(as.integer(x), na.rm = T))/sd(as.integer(x), na.rm = T)}
-mushroom[2:23] <- apply(mushroom[2:23], 2, normFunc)
+mushroom[2:22] <- apply(mushroom[2:22], 2, normFunc)
 
 head(mushroom)
 
@@ -84,8 +86,13 @@ ggplot(mushroom, aes(x = gill_color, y = cap_color, col = edibility)) +
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
 
-ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) + 
+ggplot(mushroom, aes(x = mush, y = odor, col = edibility)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
+
+
+
+
+
 
