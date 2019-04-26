@@ -1,26 +1,33 @@
 #library(tidyverse)
 #install.packages("tidyverse")
+
+
+columnNames <- c(
+  "edibility", "cap_shape", "cap_surface", 
+  "cap_color", "bruises", "odor", 
+  "gill_attachement", "gill_spacing", "gill_size", 
+  "gill_color", "stalk_shape", "stalk_root", 
+  "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
+  "stalk_color_below_ring", "veil_color", 
+  "ring_number", "ring_type", "spore_print_color", 
+  "population", "habitat")
+
 mushroom <- read.table("agaricus-lepiota.data",
                        sep = ",",
                        na.strings = "?",
                        colClasses = NA,
                        header = FALSE,
-                       col.names=c(
-                         "edibility", "cap_shape", "cap_surface", 
-                         "cap_color", "bruises", "odor", 
-                         "gill_attachement", "gill_spacing", "gill_size", 
-                         "gill_color", "stalk_shape", "stalk_root", 
-                         "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-                         "stalk_color_below_ring", "veil_color", 
-                         "ring_number", "ring_type", "spore_print_color", 
-                         "population", "habitat"
-                       )) # there are missing value so it gets warning
+                       col.names= columnNames) # there are missing value so it gets warning
 
 summary(mushroom)
+
+
 #showing missing values with a graph
 library(Amelia)
 #install.packages("Amelia")
 missmap(mushroom, main = "Missing values vs observed")
+
+
 #replace NA values to columns mode
 Mode <- function (x, na.rm) {
   xtab <- table(x)
@@ -51,7 +58,6 @@ mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
 mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
-mushroom$veil_type <- as.numeric(mushroom$veil_type)
 mushroom$veil_color <- as.numeric(mushroom$veil_color)
 mushroom$ring_number <- as.numeric(mushroom$ring_number)
 mushroom$ring_type <- as.numeric(mushroom$ring_type)
