@@ -86,7 +86,7 @@ ggplot(mushroom, aes(x = gill_color, y = cap_color, col = edibility)) +
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
 
-ggplot(mushroom, aes(x = mush, y = odor, col = edibility)) + 
+ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
