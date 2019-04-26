@@ -1,44 +1,25 @@
 #library(tidyverse)
 #install.packages("tidyverse")
-
-
 columnNames <- c(
   "edibility", "cap_shape", "cap_surface", 
   "cap_color", "bruises", "odor", 
   "gill_attachement", "gill_spacing", "gill_size", 
   "gill_color", "stalk_shape", "stalk_root", 
   "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-  "stalk_color_below_ring", "veil_color", 
+  "stalk_color_below_ring", "veil_type", "veil_color", 
   "ring_number", "ring_type", "spore_print_color", 
   "population", "habitat")
 
+#include dataset from disk
 mushroom <- read.table("agaricus-lepiota.data",
                        sep = ",",
                        na.strings = "?",
                        colClasses = NA,
                        header = FALSE,
-                       col.names= columnNames) # there are missing value so it gets warning
+                       col.names= columnNames
+                       ) # there are missing value so it gets warning
 
-summary(mushroom)
-
-
-#showing missing values with a graph
-library(Amelia)
-#install.packages("Amelia")
-missmap(mushroom, main = "Missing values vs observed")
-
-
-#replace NA values to columns mode
-Mode <- function (x, na.rm) {
-  xtab <- table(x)
-  xmode <- names(which(xtab == max(xtab)))
-  if (length(xmode) > 1) xmode <- ">1 mode"
-  return(xmode)
-}
-for (var in 1:ncol(mushroom)) {
-    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-}
-
+head(mushroom) # without numeric values, pure non preparing
 
 #After the mode process, the graph
 missmap(mushroom, main = "Missing values vs observed")
@@ -65,28 +46,29 @@ mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
 mushroom$population <- as.numeric(mushroom$population)
 mushroom$habitat <- as.numeric(mushroom$habitat)
 
+#replace NA values to columns mode
+Mode <- function (x, na.rm) {
+  xtab <- table(x)
+  xmode <- names(which(xtab == max(xtab)))
+  if (length(xmode) > 1) xmode <- ">1 mode"
+  return(xmode)
+}
 
+for (var in 1:ncol(mushroom)) {
+    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
+}
 
+sum(is.na(mushroom$veil_type))   
+unique(mushroom$veil_type)
+#there is one unique values of veil_type, we can remove this column in our dataset.
+mushroom <- subset(mushroom, select = -c(17)) #17 is index of veil_type
+head(mushroom)
 
-# Logistics Regression training and test
-library(caret)
-inTrain <- createDataPartition(y = mushroom$edibility, p = .80, list = FALSE)
-training_mushroom <- mushroom[inTrain,]# %80
-test_mushroom <- mushroom[-inTrain,] # %20
+#normalize integer values
+normFunc <- function(x){(as.integer(x)-mean(as.integer(x), na.rm = T))/sd(as.integer(x), na.rm = T)}
+mushroom[2:22] <- apply(mushroom[2:22], 2, normFunc)
 
-summary(mushroom)
-#there is a problem to solve
-glm.fit <- glm(edibility ~ cap_shape + cap_surface + cap_color + bruises + odor + 
-               gill_attachement + gill_spacing + gill_size + 
-               gill_color + stalk_shape + stalk_root + 
-               stalk_surface_above_ring + stalk_surface_below_ring + stalk_color_above_ring + 
-               stalk_color_below_ring + veil_color + 
-               ring_number + ring_type + spore_print_color +
-               population + habitat,
-               data = training_mushroom, 
-               family = binomial)
-
-
+head(mushroom)
 
 library(ggplot2)
 ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
@@ -108,4 +90,3 @@ ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) +
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
-
