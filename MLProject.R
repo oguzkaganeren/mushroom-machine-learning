@@ -11,11 +11,30 @@ mushroom <- read.table("agaricus-lepiota.data",
                          "gill_attachement", "gill_spacing", "gill_size", 
                          "gill_color", "stalk_shape", "stalk_root", 
                          "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-                         "stalk_color_below_ring", "veil_type", "veil_color", 
+                         "stalk_color_below_ring", "veil_color", 
                          "ring_number", "ring_type", "spore_print_color", 
                          "population", "habitat"
                        )) # there are missing value so it gets warning
 
+summary(mushroom)
+#showing missing values with a graph
+library(Amelia)
+#install.packages("Amelia")
+missmap(mushroom, main = "Missing values vs observed")
+#replace NA values to columns mode
+Mode <- function (x, na.rm) {
+  xtab <- table(x)
+  xmode <- names(which(xtab == max(xtab)))
+  if (length(xmode) > 1) xmode <- ">1 mode"
+  return(xmode)
+}
+for (var in 1:ncol(mushroom)) {
+    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
+}
+
+
+#After the mode process, the graph
+missmap(mushroom, main = "Missing values vs observed")
 ## categoric to numeric without target
 mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
 mushroom$cap_surface <- as.numeric(mushroom$cap_surface)
@@ -40,18 +59,29 @@ mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
 mushroom$population <- as.numeric(mushroom$population)
 mushroom$habitat <- as.numeric(mushroom$habitat)
 
-#replace NA values to columns mode
-Mode <- function (x, na.rm) {
-  xtab <- table(x)
-  xmode <- names(which(xtab == max(xtab)))
-  if (length(xmode) > 1) xmode <- ">1 mode"
-  return(xmode)
-}
-for (var in 1:ncol(mushroom)) {
-    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-}
 
-sum(is.na(mushroom$stalk_root))   
+
+
+# Logistics Regression training and test
+library(caret)
+inTrain <- createDataPartition(y = mushroom$edibility, p = .80, list = FALSE)
+training_mushroom <- mushroom[inTrain,]# %80
+test_mushroom <- mushroom[-inTrain,] # %20
+
+summary(mushroom)
+#there is a problem to solve
+glm.fit <- glm(edibility ~ cap_shape + cap_surface + cap_color + bruises + odor + 
+               gill_attachement + gill_spacing + gill_size + 
+               gill_color + stalk_shape + stalk_root + 
+               stalk_surface_above_ring + stalk_surface_below_ring + stalk_color_above_ring + 
+               stalk_color_below_ring + veil_color + 
+               ring_number + ring_type + spore_print_color +
+               population + habitat,
+               data = training_mushroom, 
+               family = binomial)
+
+
+
 library(ggplot2)
 ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
   geom_jitter(alpha = 0.5) + 
