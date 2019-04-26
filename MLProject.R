@@ -1,6 +1,5 @@
 #library(tidyverse)
 #install.packages("tidyverse")
-
 columnNames <- c(
   "edibility", "cap_shape", "cap_surface", 
   "cap_color", "bruises", "odor", 
@@ -22,6 +21,8 @@ mushroom <- read.table("agaricus-lepiota.data",
 
 head(mushroom) # without numeric values, pure non preparing
 
+#After the mode process, the graph
+missmap(mushroom, main = "Missing values vs observed")
 ## categoric to numeric without target
 mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
 mushroom$cap_surface <- as.numeric(mushroom$cap_surface)
@@ -38,7 +39,6 @@ mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
 mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
-mushroom$veil_type <- as.numeric(mushroom$veil_type)
 mushroom$veil_color <- as.numeric(mushroom$veil_color)
 mushroom$ring_number <- as.numeric(mushroom$ring_number)
 mushroom$ring_type <- as.numeric(mushroom$ring_type)
@@ -90,9 +90,3 @@ ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) +
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
-
-
-
-
-
-
