@@ -1,3 +1,4 @@
+
 columnNames <- c(
   "edibility", "cap_shape", "cap_surface", 
   "cap_color", "bruises", "odor", 
@@ -8,33 +9,16 @@ columnNames <- c(
   "ring_number", "ring_type", "spore_print_color", 
   "population", "habitat")
 
+#include dataset from disk
 mushroom <- read.table("agaricus-lepiota.data",
                        sep = ",",
                        na.strings = "?",
                        colClasses = NA,
                        header = FALSE,
-                       col.names= columnNames) # there are missing value so it gets warning
+                       col.names= columnNames
+                       ) # there are missing value so it gets warning
 
-summary(mushroom)
-
-
-#showing missing values with a graph
-library(Amelia)
-#install.packages("Amelia")
-missmap(mushroom, main = "Missing values vs observed")
-
-
-#replace NA values to columns mode
-Mode <- function (x, na.rm) {
-  xtab <- table(x)
-  xmode <- names(which(xtab == max(xtab)))
-  if (length(xmode) > 1) xmode <- ">1 mode"
-  return(xmode)
-}
-for (var in 1:ncol(mushroom)) {
-    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-}
-
+head(mushroom) # without numeric values, pure non preparing
 
 #After the mode process, the graph
 missmap(mushroom, main = "Missing values vs observed")
@@ -62,7 +46,17 @@ mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
 mushroom$population <- as.numeric(mushroom$population)
 mushroom$habitat <- as.numeric(mushroom$habitat)
 
+#replace NA values to columns mode
+Mode <- function (x, na.rm) {
+  xtab <- table(x)
+  xmode <- names(which(xtab == max(xtab)))
+  if (length(xmode) > 1) xmode <- ">1 mode"
+  return(xmode)
+}
 
+for (var in 1:ncol(mushroom)) {
+    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
+}
 
 #install.packages("corrplot")
 library(corrplot)
@@ -106,6 +100,17 @@ glm.probs <- predict(glm.fit,type = "response")
 glm.probs[1:5]
 glm.pred <- ifelse(glm.probs > 0.5, "Up", "Down")
 
+sum(is.na(mushroom$veil_type))   
+unique(mushroom$veil_type)
+#there is one unique values of veil_type, we can remove this column in our dataset.
+mushroom <- subset(mushroom, select = -c(17)) #17 is index of veil_type
+head(mushroom)
+
+#normalize integer values
+normFunc <- function(x){(as.integer(x)-mean(as.integer(x), na.rm = T))/sd(as.integer(x), na.rm = T)}
+mushroom[2:22] <- apply(mushroom[2:22], 2, normFunc)
+
+head(mushroom)
 
 library(ggplot2)
 ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
@@ -127,4 +132,3 @@ ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) +
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
-
