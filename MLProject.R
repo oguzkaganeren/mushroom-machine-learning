@@ -1,14 +1,10 @@
-#library(tidyverse)
-#install.packages("tidyverse")
-
-
 columnNames <- c(
   "edibility", "cap_shape", "cap_surface", 
   "cap_color", "bruises", "odor", 
   "gill_attachement", "gill_spacing", "gill_size", 
   "gill_color", "stalk_shape", "stalk_root", 
   "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-  "stalk_color_below_ring", "veil_color", 
+  "stalk_color_below_ring", "veil_type", "veil_color", 
   "ring_number", "ring_type", "spore_print_color", 
   "population", "habitat")
 
@@ -58,6 +54,7 @@ mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
 mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
+mushroom$veil_type <- as.numeric(mushroom$veil_type)
 mushroom$veil_color <- as.numeric(mushroom$veil_color)
 mushroom$ring_number <- as.numeric(mushroom$ring_number)
 mushroom$ring_type <- as.numeric(mushroom$ring_type)
@@ -65,6 +62,20 @@ mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
 mushroom$population <- as.numeric(mushroom$population)
 mushroom$habitat <- as.numeric(mushroom$habitat)
 
+
+
+#install.packages("corrplot")
+library(corrplot)
+correlations <- cor(mushroom[,2:22])
+corrplot(correlations, method="circle")
+#A dot-representation was used where blue represents positive correlation and red negative.
+#The larger the dot the larger the correlation.
+#You can see that the matrix is symmetrical and that the diagonal are perfectly positively correlated because it 
+#shows the correlation of each variable with itself. Unfortunately, none of the variables are correlated with one another.
+
+
+#pairs
+pairs(mushroom, col=mushroom$edibility)#take a long time
 
 
 
@@ -75,17 +86,25 @@ training_mushroom <- mushroom[inTrain,]# %80
 test_mushroom <- mushroom[-inTrain,] # %20
 
 summary(mushroom)
+
+
+
 #there is a problem to solve
 glm.fit <- glm(edibility ~ cap_shape + cap_surface + cap_color + bruises + odor + 
                gill_attachement + gill_spacing + gill_size + 
                gill_color + stalk_shape + stalk_root + 
                stalk_surface_above_ring + stalk_surface_below_ring + stalk_color_above_ring + 
-               stalk_color_below_ring + veil_color + 
-               ring_number + ring_type + spore_print_color +
+               stalk_color_below_ring + 
+               ring_number + spore_print_color +
                population + habitat,
                data = training_mushroom, 
-               family = binomial)
+               family = binomial)#missing some columns
 
+summary(glm.fit)
+
+glm.probs <- predict(glm.fit,type = "response")
+glm.probs[1:5]
+glm.pred <- ifelse(glm.probs > 0.5, "Up", "Down")
 
 
 library(ggplot2)
