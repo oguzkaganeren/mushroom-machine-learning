@@ -18,10 +18,29 @@ mushroom <- read.table("agaricus-lepiota.data",
                        col.names= columnNames
                        ) # there are missing value so it gets warning
 
+drops <- c("veil_type")
+mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type
+
+
 head(mushroom) # without numeric values, pure non preparing
 
-#After the mode process, the graph
+# the missing value graph
+#install.packages("Amelia")
+library(Amelia)
 missmap(mushroom, main = "Missing values vs observed")
+
+#replace NA values to columns mode
+Mode <- function (x, na.rm) {
+  xtab <- table(x)
+  xmode <- names(which(xtab == max(xtab)))
+  if (length(xmode) > 1) xmode <- ">1 mode"
+  return(xmode)
+}
+
+for (var in 1:ncol(mushroom)) {
+  mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
+}
+
 ## categoric to numeric without target
 mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
 mushroom$cap_surface <- as.numeric(mushroom$cap_surface)
@@ -38,7 +57,6 @@ mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
 mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
 mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
-mushroom$veil_type <- as.numeric(mushroom$veil_type)
 mushroom$veil_color <- as.numeric(mushroom$veil_color)
 mushroom$ring_number <- as.numeric(mushroom$ring_number)
 mushroom$ring_type <- as.numeric(mushroom$ring_type)
@@ -46,26 +64,25 @@ mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
 mushroom$population <- as.numeric(mushroom$population)
 mushroom$habitat <- as.numeric(mushroom$habitat)
 
-#replace NA values to columns mode
-Mode <- function (x, na.rm) {
-  xtab <- table(x)
-  xmode <- names(which(xtab == max(xtab)))
-  if (length(xmode) > 1) xmode <- ">1 mode"
-  return(xmode)
-}
 
-for (var in 1:ncol(mushroom)) {
-    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-}
 
-#install.packages("corrplot")
+missmap(mushroom, main = "Missing values vs observed")# there is no missing value
+summary(mushroom)
+install.packages("corrplot")
 library(corrplot)
-correlations <- cor(mushroom[,2:22])
+
+correlations <- cor(mushroom[,2:dim(mushroom)[2]])
 corrplot(correlations, method="circle")
 #A dot-representation was used where blue represents positive correlation and red negative.
 #The larger the dot the larger the correlation.
 #You can see that the matrix is symmetrical and that the diagonal are perfectly positively correlated because it 
 #shows the correlation of each variable with itself. Unfortunately, none of the variables are correlated with one another.
+
+#visualizing data
+par(mfrow=c(1,dim(mushroom)[2]))
+for(i in 2:dim(mushroom)[2]) {
+  hist(mushroom[,i], main=names(mushroom)[i])
+}
 
 
 #pairs
@@ -74,6 +91,7 @@ pairs(mushroom, col=mushroom$edibility)#take a long time
 
 
 # Logistics Regression training and test
+install.packages("corrplot")
 library(caret)
 inTrain <- createDataPartition(y = mushroom$edibility, p = .80, list = FALSE)
 training_mushroom <- mushroom[inTrain,]# %80
@@ -88,20 +106,28 @@ glm.fit <- glm(edibility ~ cap_shape + cap_surface + cap_color + bruises + odor 
                gill_attachement + gill_spacing + gill_size + 
                gill_color + stalk_shape + stalk_root + 
                stalk_surface_above_ring + stalk_surface_below_ring + stalk_color_above_ring + 
-               stalk_color_below_ring + 
-               ring_number + spore_print_color +
-               population + habitat,
-               data = training_mushroom, 
-               family = binomial)#missing some columns
+               stalk_color_below_ring + veil_color +
+               ring_number + ring_type + spore_print_color + population + habitat,
+               data = mushroom, 
+               family = binomial,
+               subset = inTrain)
+
 
 summary(glm.fit)
-
-glm.probs <- predict(glm.fit,type = "response")
+#There is a problem, working on it
+glm.probs <- predict(glm.fit, 
+                     newdata = test_mushroom, 
+                     type = "response")
 glm.probs[1:5]
-glm.pred <- ifelse(glm.probs > 0.5, "Up", "Down")
+glm.pred <- ifelse(glm.probs > 0.5, "Poison", "edibility")
 
-sum(is.na(mushroom$veil_type))   
-unique(mushroom$veil_type)
+attach(mushroom)
+table(glm.pred,edibility)
+
+
+
+# following related with Tayyip
+
 #there is one unique values of veil_type, we can remove this column in our dataset.
 mushroom <- subset(mushroom, select = -c(17)) #17 is index of veil_type
 head(mushroom)
