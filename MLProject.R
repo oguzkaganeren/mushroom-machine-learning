@@ -108,26 +108,25 @@ test_mushroom <- mushroom[-inTrain,] # %20
 summary(mushroom)
 
 
-
-#there is a problem to solve
-glm.fit <- glm(edibility ~ cap_shape + cap_surface + cap_color + bruises + odor + 
-               gill_attachement + gill_spacing + gill_size + 
-               gill_color + stalk_shape + stalk_root + 
-               stalk_surface_above_ring + stalk_surface_below_ring + stalk_color_above_ring + 
-               stalk_color_below_ring + veil_color +
-               ring_number + ring_type + spore_print_color + population + habitat,
-               data = mushroom, 
-               family = binomial,
-               subset = inTrain)
+#install.packages("arm")
+#veil_color and gill_attachement not include because of an error(should be solved)
+library(arm)
+fit <- bayesglm(edibility ~ cap_shape + cap_surface + cap_color + bruises + odor + 
+                   gill_spacing + gill_size + 
+                  gill_color + stalk_shape + stalk_root + 
+                  stalk_surface_above_ring + stalk_surface_below_ring + stalk_color_above_ring + 
+                  stalk_color_below_ring + 
+                  ring_number + ring_type + spore_print_color + population + habitat, data=mushroom, family="binomial")
 
 
-summary(glm.fit)
-#There is a problem, working on it
-glm.probs <- predict(glm.fit, 
-                     newdata = test_mushroom, 
-                     type = "response")
+display(fit)
+summary(fit)
+
+glm.probs <- predict(fit, type = "response")
 glm.probs[1:5]
-glm.pred <- ifelse(glm.probs > 0.5, "Poison", "edibility")
+glm.pred <- ifelse(glm.probs > 7, "Poison", "edibility")
+mean(glm.pred == edibility)
+
 
 attach(mushroom)
 table(glm.pred,edibility)
