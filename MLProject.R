@@ -89,9 +89,17 @@ for(i in 2:dim(mushroom)[2]) {
 pairs(mushroom, col=mushroom$edibility)#take a long time
 
 
+#density
 
-# Logistics Regression training and test
-install.packages("corrplot")
+library(caret)
+x <- mushroom[,2:dim(mushroom)[2]]
+y <- mushroom[,1]
+scales <- list(x=list(relation="free"), y=list(relation="free"))
+featurePlot(x=x, y=y, plot="density", scales=scales)
+
+
+  # Logistics Regression training and test
+#install.packages("corrplot")
 library(caret)
 inTrain <- createDataPartition(y = mushroom$edibility, p = .80, list = FALSE)
 training_mushroom <- mushroom[inTrain,]# %80
