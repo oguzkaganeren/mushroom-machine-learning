@@ -1,7 +1,7 @@
-#library(tidyverse)
-#install.packages("tidyverse")
+#install.packages("Amelia")
+#library(Amelia)
 columnNames <- c(
-  "edibility", "cap_shape", "cap_surface", 
+  "class", "cap_shape", "cap_surface", 
   "cap_color", "bruises", "odor", 
   "gill_attachement", "gill_spacing", "gill_size", 
   "gill_color", "stalk_shape", "stalk_root", 
@@ -19,39 +19,9 @@ mushroom <- read.table("agaricus-lepiota.data",
                        col.names= columnNames
 ) # there are missing value so it gets warning
 
-unique(mushroom$veil_type)
-#there is one unique values of veil_type, we can remove this column in our dataset.
-drops <- c("veil_type")
-mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type
+#unique(mushroom$veil_type)
 
-head(mushroom) # without numeric values, pure non preparing
-
-#After the mode process, the graph
-#install.packages("Amelia")
-library(Amelia)
 #missmap(mushroom, main = "Missing values vs observed")
-## categoric to numeric without target
-mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
-mushroom$cap_surface <- as.numeric(mushroom$cap_surface)
-mushroom$cap_color <- as.numeric(mushroom$cap_color)
-mushroom$bruises <- as.numeric(mushroom$bruises)
-mushroom$odor <- as.numeric(mushroom$odor)
-mushroom$gill_attachement <- as.numeric(mushroom$gill_attachement)
-mushroom$gill_spacing <- as.numeric(mushroom$gill_spacing)
-mushroom$gill_size <- as.numeric(mushroom$gill_size)
-mushroom$gill_color <- as.numeric(mushroom$gill_color)
-mushroom$stalk_shape <- as.numeric(mushroom$stalk_shape)
-mushroom$stalk_root <- as.numeric(mushroom$stalk_root)
-mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
-mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
-mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
-mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
-mushroom$veil_color <- as.numeric(mushroom$veil_color)
-mushroom$ring_number <- as.numeric(mushroom$ring_number)
-mushroom$ring_type <- as.numeric(mushroom$ring_type)
-mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
-mushroom$population <- as.numeric(mushroom$population)
-mushroom$habitat <- as.numeric(mushroom$habitat)
 
 #replace NA values to columns mode
 Mode <- function (x, na.rm) {
@@ -68,10 +38,19 @@ for (var in 1:ncol(mushroom)) {
 #after data preparation of missing values.
 #missmap(mushroom, main = "After data preparation of missing values")
 
-#head(mushroom)
+drops <- c("veil_type") #there is one unique values of veil_type, we can remove this column in our dataset.
+mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type
+#head(mushroom) # without numeric values, pure non preparing
 
-#normalize integer values
-normFunc <- function(x){(as.integer(x)-mean(as.integer(x), na.rm = T))/sd(as.integer(x), na.rm = T)}
-mushroom[2:22] <- apply(mushroom[2:22], 2, normFunc)
+## categoric to numeric without target
+library(mlr)
+mush <- createDummyFeatures(mushroom[2:22])
+mush$class <- mushroom$class
+#After the mode process, the graph
+
+head(mush)
 
 #head(mushroom) # list the dataset after fill missing values, categoricial to numericial, and normalization.
+# remove unncessary data
+rm(columnNames,drops,var,Mode, mushroom)
+
