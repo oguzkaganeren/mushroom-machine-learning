@@ -1,92 +1,45 @@
-#library(tidyverse)
-#install.packages("tidyverse")
-columnNames <- c(
-  "edibility", "cap_shape", "cap_surface", 
-  "cap_color", "bruises", "odor", 
-  "gill_attachement", "gill_spacing", "gill_size", 
-  "gill_color", "stalk_shape", "stalk_root", 
-  "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-  "stalk_color_below_ring", "veil_type", "veil_color", 
-  "ring_number", "ring_type", "spore_print_color", 
-  "population", "habitat")
+#include data preparation file
+source(file = "Preparation.R") # just shows worked dataset after data preparation.
 
-#include dataset from disk
-mushroom <- read.table("agaricus-lepiota.data",
-                       sep = ",",
-                       na.strings = "?",
-                       colClasses = NA,
-                       header = FALSE,
-                       col.names= columnNames
-                       ) # there are missing value so it gets warning
-
-head(mushroom) # without numeric values, pure non preparing
-
-#After the mode process, the graph
-missmap(mushroom, main = "Missing values vs observed")
-## categoric to numeric without target
-mushroom$cap_shape <- as.numeric(mushroom$cap_shape)
-mushroom$cap_surface <- as.numeric(mushroom$cap_surface)
-mushroom$cap_color <- as.numeric(mushroom$cap_color)
-mushroom$bruises <- as.numeric(mushroom$bruises)
-mushroom$odor <- as.numeric(mushroom$odor)
-mushroom$gill_attachement <- as.numeric(mushroom$gill_attachement)
-mushroom$gill_spacing <- as.numeric(mushroom$gill_spacing)
-mushroom$gill_size <- as.numeric(mushroom$gill_size)
-mushroom$gill_color <- as.numeric(mushroom$gill_color)
-mushroom$stalk_shape <- as.numeric(mushroom$stalk_shape)
-mushroom$stalk_root <- as.numeric(mushroom$stalk_root)
-mushroom$stalk_surface_above_ring <- as.numeric(mushroom$cap_shape)
-mushroom$stalk_surface_below_ring <- as.numeric(mushroom$cap_shape)
-mushroom$stalk_color_above_ring <- as.numeric(mushroom$stalk_color_above_ring)
-mushroom$stalk_color_below_ring <- as.numeric(mushroom$stalk_color_below_ring)
-mushroom$veil_color <- as.numeric(mushroom$veil_color)
-mushroom$ring_number <- as.numeric(mushroom$ring_number)
-mushroom$ring_type <- as.numeric(mushroom$ring_type)
-mushroom$spore_print_color <- as.numeric(mushroom$spore_print_color)
-mushroom$population <- as.numeric(mushroom$population)
-mushroom$habitat <- as.numeric(mushroom$habitat)
-
-#replace NA values to columns mode
-Mode <- function (x, na.rm) {
-  xtab <- table(x)
-  xmode <- names(which(xtab == max(xtab)))
-  if (length(xmode) > 1) xmode <- ">1 mode"
-  return(xmode)
-}
-
-for (var in 1:ncol(mushroom)) {
-    mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-}
-
-sum(is.na(mushroom$veil_type))   
-unique(mushroom$veil_type)
-#there is one unique values of veil_type, we can remove this column in our dataset.
-mushroom <- subset(mushroom, select = -c(17)) #17 is index of veil_type
+#show current dataset
 head(mushroom)
+summary(mushroom)
 
-#normalize integer values
-normFunc <- function(x){(as.integer(x)-mean(as.integer(x), na.rm = T))/sd(as.integer(x), na.rm = T)}
-mushroom[2:22] <- apply(mushroom[2:22], 2, normFunc)
 
-head(mushroom)
 
-library(ggplot2)
-ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
-  geom_jitter(alpha = 0.5) + 
-  scale_color_manual(breaks = c("edible", "poisonous"), 
-                     values = c("green", "red"))
+#begin the logistic function (Model fitting)
+set.seed(579642)  #Set the seed for reproducibility
+train_index <- sample(1:nrow(mushroom), size=nrow(mushroom)*0.8) # randomly choice rows
+test  <- mushroom[-train_index,]
+train <- mushroom[train_index,]
 
-ggplot(mushroom, aes(x = cap_shape, y = cap_color, col = edibility)) + 
-  geom_jitter(alpha = 0.5) + 
-  scale_color_manual(breaks = c("edible", "poisonous"), 
-                     values = c("green", "red"))
+library(arm)
+try1 = bayesglm(formula = class ~ ., data = train, family=binomial(link='logit'))
 
-ggplot(mushroom, aes(x = gill_color, y = cap_color, col = edibility)) + 
-  geom_jitter(alpha = 0.5) + 
-  scale_color_manual(breaks = c("edible", "poisonous"), 
-                     values = c("green", "red"))
+glm.probs <- predict(try1, type = "response")
+glm.probs[1:5]
+glm.pred  <- ifelse(glm.probs > 0.5,"p","e")
+misClasificError <- mean(glm.pred != train$class)
+print(paste('Accuracy',1-misClasificError))
 
-ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) + 
-  geom_jitter(alpha = 0.5) + 
-  scale_color_manual(breaks = c("edible", "poisonous"), 
-                     values = c("green", "red"))
+#Assessing the predictive ability of the model
+fitted.results <- predict(try1,newdata=subset(test),type='response')
+fitted.results <- ifelse(fitted.results > 0.5,"p","e")
+
+misClasificError <- mean(fitted.results != test$class)
+print(paste('Accuracy',1-misClasificError))
+
+#ROC Curve
+#install.packages("ROCR")
+library(ROCR)
+p <- predict(try1, newdata=subset(test), type="response")
+pr <- prediction(p, test$class)
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+
+auc <- performance(pr, measure = "auc")
+auc <- auc@y.values[[1]]
+auc
+#https://www.r-bloggers.com/how-to-perform-a-logistic-regression-in-r/
+
+
