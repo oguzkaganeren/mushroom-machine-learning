@@ -69,7 +69,7 @@ mushroom$habitat <- scale(as.numeric(mushroom$habitat), center = TRUE, scale = T
 
 #After the mode process, the graph
 
-head(mushroom)
+#head(mushroom)
 
 #head(mushroom) # list the dataset after fill missing values, categoricial to numericial, and normalization.
 # remove unncessary data
