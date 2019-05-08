@@ -14,9 +14,12 @@ test  <- mushroom[-train_index,]
 train <- mushroom[train_index,]
 
 library(arm)
+#if we calculate the linear regression model, remove family part
 try1 = bayesglm(formula = class ~ ., data = train, family=binomial(link='logit'))
 
 glm.probs <- predict(try1, type = "response")
+probs <- exp(glm.probs)/(1+exp(glm.probs)) #gives you probability that y=1 for each observation
+
 glm.probs[1:5]
 glm.pred  <- ifelse(glm.probs > 0.5,"p","e")
 misClasificError <- mean(glm.pred != train$class)
