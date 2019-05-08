@@ -17,9 +17,8 @@ mushroom <- read.table("agaricus-lepiota.data",
                        colClasses = NA,
                        header = FALSE,
                        col.names= columnNames
-) # there are missing value so it gets warning
+)
 
-#unique(mushroom$veil_type)
 
 #missmap(mushroom, main = "Missing values vs observed")
 
@@ -35,6 +34,27 @@ for (var in 1:ncol(mushroom)) {
   mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
 }
 
+#Analysis
+
+library(ggplot2)
+library(gridExtra)
+myplots <- list()  # new empty list
+for (i in 1:ncol(mushroom)) {
+  p1 <- eval(substitute(
+    ggplot(aes(x = mushroom[[i]]), data = mushroom) +
+      geom_histogram(stat = "count") +
+      facet_wrap(~class) +
+      xlab(colnames(mushroom)[i]))
+    ,list(i = i))
+  myplots[[i]] <- p1  # add each plot into plot list
+}#my precious
+#we plot the histograms of each category and split them into two graphs according to their edibility.
+grid.arrange(myplots[[2]],myplots[[3]],myplots[[4]],myplots[[5]], ncol = 2)
+grid.arrange(myplots[[6]],myplots[[7]],myplots[[8]],myplots[[9]], ncol = 2)
+grid.arrange(myplots[[10]],myplots[[11]],myplots[[12]],myplots[[13]], ncol = 2)
+grid.arrange(myplots[[14]],myplots[[15]],myplots[[16]],myplots[[17]], ncol = 2)
+grid.arrange(myplots[[18]],myplots[[19]],myplots[[20]],myplots[[21]],myplots[[22]],myplots[[23]], ncol = 2)
+
 #after data preparation of missing values.
 #missmap(mushroom, main = "After data preparation of missing values")
 
@@ -44,27 +64,9 @@ mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type
 #head(mushroom) # without numeric values, pure non preparing
 
 ## categoric to numeric without target
-mushroom$cap_shape <- scale(as.numeric(mushroom$cap_shape), center = TRUE, scale = TRUE)
-mushroom$cap_surface <- scale(as.numeric(mushroom$cap_surface), center = TRUE, scale = TRUE)
-mushroom$cap_color <- scale(as.numeric(mushroom$cap_color), center = TRUE, scale = TRUE)
-mushroom$bruises <- scale(as.numeric(mushroom$bruises), center = TRUE, scale = TRUE)
-mushroom$odor <- scale(as.numeric(mushroom$odor), center = TRUE, scale = TRUE)
-mushroom$gill_attachement <-scale(as.numeric(mushroom$gill_attachement), center = TRUE, scale = TRUE)
-mushroom$gill_spacing <- scale(as.numeric(mushroom$gill_spacing), center = TRUE, scale = TRUE)
-mushroom$gill_size <- scale(as.numeric(mushroom$gill_size), center = TRUE, scale = TRUE)
-mushroom$gill_color <- scale(as.numeric(mushroom$gill_color), center = TRUE, scale = TRUE)
-mushroom$stalk_shape <- scale(as.numeric(mushroom$stalk_shape), center = TRUE, scale = TRUE)
-mushroom$stalk_root <- scale(as.numeric(mushroom$stalk_root), center = TRUE, scale = TRUE)
-mushroom$stalk_surface_above_ring <- scale(as.numeric(mushroom$stalk_surface_above_ring), center = TRUE, scale = TRUE)
-mushroom$stalk_surface_below_ring <- scale(as.numeric(mushroom$stalk_surface_below_ring), center = TRUE, scale = TRUE)
-mushroom$stalk_color_above_ring <- scale(as.numeric(mushroom$stalk_color_above_ring), center = TRUE, scale = TRUE)
-mushroom$stalk_color_below_ring <- scale(as.numeric(mushroom$stalk_color_below_ring), center = TRUE, scale = TRUE)
-mushroom$veil_color <- scale(as.numeric(mushroom$veil_color), center = TRUE, scale = TRUE)
-mushroom$ring_number <- scale(as.numeric(mushroom$ring_number), center = TRUE, scale = TRUE)
-mushroom$ring_type <- scale(as.numeric(mushroom$ring_type), center = TRUE, scale = TRUE)
-mushroom$spore_print_color <- scale(as.numeric(mushroom$spore_print_color), center = TRUE, scale = TRUE)
-mushroom$population <- scale(as.numeric(mushroom$population), center = TRUE, scale = TRUE)
-mushroom$habitat <- scale(as.numeric(mushroom$habitat), center = TRUE, scale = TRUE)
+for (var in 1:ncol(mushroom)) {
+  mushroom[[var]] <- as.numeric( mushroom[[var]])
+}
 
 
 #After the mode process, the graph
