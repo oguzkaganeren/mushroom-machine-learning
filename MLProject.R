@@ -56,7 +56,7 @@ table(train$class, PredTrain > 0.5)
 #ROC Curve
 #install.packages("ROCR")
 library(ROCR)
-p <- predict(try1, newdata=subset(test), type="response")
+p <- predict(model, newdata=subset(test), type="response")
 pr <- prediction(p, test$class)
 prf <- performance(pr, measure = "tpr", x.measure = "fpr")
 plot(prf)
