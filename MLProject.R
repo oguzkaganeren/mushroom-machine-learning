@@ -22,7 +22,7 @@ train_index <- sample(1:nrow(mushroom), size=nrow(mushroom)*TRAIN_SIZE) # random
 test  <- mushroom[-train_index,]
 train <- mushroom[train_index,]
 
-#start_time <- Sys.time()
+start_time <- Sys.time()
 model = glm(formula = class ~ ., data = train, family = binomial())
 summary(model)
 #NA değerler var, bunun sebebi birden fazla attribute un iyi bir şekilde eşleşmesi
@@ -63,9 +63,9 @@ print(F_Score)
 Precision <- TP*100/(TP+FP)
 print(Precision)
 
-#end_time <- Sys.time()
+end_time <- Sys.time()
 
-#print(paste("running time => ", (end_time-start_time)))
+print(paste("running time => ", (end_time-start_time)))
 
 
 
