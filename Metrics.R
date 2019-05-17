@@ -1,4 +1,4 @@
-source(file = "LoadDataset.R") # load dataset
+mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE) # load dataset
 #show missing data in a table
 sums <- NULL
 for(i in 1:length(mushroom)){

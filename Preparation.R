@@ -11,8 +11,10 @@ mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE) # load dataset
 #  mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
 #}
 
+
 #after data preparation of missing values.
 #missmap(mushroom, main = "After data preparation of missing values")
+#Centroid parametresi, en uygun oluşum değerini gösterir.
 ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
   len_attr <- length(Columns)
   RMSE <- NULL
@@ -29,10 +31,14 @@ ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
   colnames(err_mat) <- c("Column name","RMSE","Norm. Error")
   err_mat
 }
-
-proportions_tab <- ComputeProportion(mushroom[,1],mushroom,c(2:23),0.482)
+col<-c(2:23)
+secondCol<-c(1:23)
+secondCol<-secondCol[-4]
+proportions_tab <- ComputeProportion(mushroom[,1],mushroom,col,0.482)
 print(proportions_tab)
-
+#for second target
+proportions_tab <- ComputeProportion(mushroom[,5],mushroom,secondCol,0.482)
+print(proportions_tab)
 #stalk_shape ve veil_type en düşük değere sahip
 drops <- c("veil_type","stalk_shape") #there is one unique values of veil_type, stalk_shape we can remove this column in our dataset.
 mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type,stalk_shape
