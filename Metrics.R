@@ -1,5 +1,10 @@
 mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE,na.strings=c("?","NA")) # load dataset
-#show missing data in a table
+
+summary.default(mushroom)# data types
+
+test<-sapply(mushroom, levels)
+sapply(test,length)
+    #show missing data in a table
 any(is.na(mushroom))#missing değer var ise true döner
 missmap(mushroom, main = "Missing values vs observed") # plot missing data distrubition
 rm(i, sums, numMissData)
@@ -31,12 +36,12 @@ for (i in 1:ncol(mushroom)) {
   p1 <- eval(substitute(
     ggplot(aes(x = mushroom[[i]]), data = mushroom) +
       geom_histogram(stat = "count") +
-      facet_wrap(~class) +
+     # facet_wrap(~class) +
       xlab(colnames(mushroom)[i]))
     ,list(i = i))
   myplots[[i]] <- p1  # add each plot into plot list
 }#my precious
-#we plot the histograms of each category and split them into two graphs according to their edibility.
+#we plot the histograms of each category
 grid.arrange(myplots[[2]],myplots[[3]],myplots[[4]],myplots[[5]], ncol = 2)
 grid.arrange(myplots[[6]],myplots[[7]],myplots[[8]],myplots[[9]], ncol = 2)
 grid.arrange(myplots[[10]],myplots[[11]],myplots[[12]],myplots[[13]], ncol = 2)
@@ -74,6 +79,8 @@ barplot(as.numeric(proportions_tab[,3]), ylab="Importance Level for edibility",
        names.arg=proportions_tab[,1],
         border="blue", col=rainbow(3),las=2)
 #for second target
+length(levels(mushroom[,5]))
+
 proportions_tab <- ComputeProportion(mushroom[,5],mushroom,secondCol,0.415)
 print(proportions_tab)
 barplot(as.numeric(proportions_tab[,3]), ylab="Importance Level for bruises", 

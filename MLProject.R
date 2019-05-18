@@ -6,7 +6,8 @@ library(purrr)
 library(Amelia)
 #include data preparation file
 source(file = "Preparation.R") # just shows worked dataset after data preparation.
-#----------------Gill_attachment
+
+#----------------
 TRAIN_SIZE  = 0.8
 NUM_OF_FOLD = 10
 TRAIN_DATA  = list()
@@ -35,7 +36,7 @@ for(i in 1:(NUM_OF_FOLD)){
   train <- mushroom[temp_index,]
 
 start_time <- Sys.time()
-model = glm(formula = gill_attachment ~ ., data = train, family = binomial())
+model = glm(formula = gill_size ~ ., data = train, family = binomial())
 #summary(model)
 #NA değerler var, bunun sebebi birden fazla attribute un iyi bir şekilde eşleşmesi
 #bu durumu istemiyoruz o yüzden NA'lı attributeları kaldırıyoruz
@@ -45,20 +46,20 @@ train <- train[ , !(names(train) %in% drops)] #remove
 test <- test[ , !(names(test) %in% drops)] #remove
 #Warning: glm.fit: algorithm did not converge hatası iterasyon sayısı ile ilgili
 #default olarak maxit=25'dir biz 100 yapıyoruz
-model <- glm(gill_attachment ~ ., data = train,family = binomial,maxit = 100)
+model <- glm(gill_size ~ ., data = train,family = binomial,maxit = 100)
 #summary(model)
 
 #şimdi modeli test datamız üzerinde test ediyoruz
 
-predicted <- predict.glm(model,newdata = test[,-7],type = "response")
+predicted <- predict.glm(model,newdata = test[,-9],type = "response")
 #tahmin edilen değerlerin 0.5 üzeri olanlar poison
 predicted <- predicted >= 0.5
-predicted <- gsub("FALSE","a",predicted)
-predicted <- gsub("TRUE","f",predicted)
+predicted <- gsub("FALSE","b",predicted)
+predicted <- gsub("TRUE","n",predicted)
 
-actual <- test[,5]
+actual <- test[,9]
 
-train_err <- mean(predicted != train$gill_attachment)
+train_err <- mean(predicted != train$gill_size)
 confusion_matrix <- table(predicted,actual)
 TP <- confusion_matrix[2,2]
 TN <- confusion_matrix[1,1]
