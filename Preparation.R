@@ -19,7 +19,7 @@ print("Natural poison rate->")
 class_proportion
 
 
-class_count <- table(mushroom$bruises)
+class_count <- table(mushroom$gill_spacing)
 class_proportion <- class_count[2]/(class_count[1]+class_count[2])
 print("Natural buises rate->")
 class_proportion

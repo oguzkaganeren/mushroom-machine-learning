@@ -2,32 +2,17 @@ mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE,na.strings=c("?","NA")
 
 summary.default(mushroom)# data types
 
+
 test<-sapply(mushroom, levels)
-sapply(test,length)
+op2<-sapply(test,length)
+barplot(op2,ylab="the number of factor levels", names.arg=names(mushroom),las=2)
     #show missing data in a table
+library(Amelia)
 any(is.na(mushroom))#missing değer var ise true döner
 missmap(mushroom, main = "Missing values vs observed") # plot missing data distrubition
 rm(i, sums, numMissData)
 
-#detect outliers
-# Plot of original data without outliers. Note the change in slope (angle) of best fit line.
-OutVals = boxplot(mushroom,las=2)$out
-for (i in 2:ncol(mushroom)) {
-  mushroom[[i]] <- remove_outliers(mushroom[[i]])
-}
-mushroom$population<-remove_outliers(mushroom$population)
-OutVals = boxplot(mushroom,las=2)$out
 
-
-
-remove_outliers <- function(x, na.rm = TRUE, ...) {
-  qnt <- quantile(x, probs=c(.25, .75), na.rm = na.rm, ...)
-  H <- 1.5 * IQR(x, na.rm = na.rm)
-  y <- x
-  y[x < (qnt[1] - H)] <- NA
-  y[x > (qnt[2] + H)] <- NA
-  y
-}
 #Draw data
 library(ggplot2)
 library(gridExtra)
@@ -40,14 +25,14 @@ for (i in 1:ncol(mushroom)) {
       xlab(colnames(mushroom)[i]))
     ,list(i = i))
   myplots[[i]] <- p1  # add each plot into plot list
-}#my precious
+}
 #we plot the histograms of each category
 grid.arrange(myplots[[2]],myplots[[3]],myplots[[4]],myplots[[5]], ncol = 2)
 grid.arrange(myplots[[6]],myplots[[7]],myplots[[8]],myplots[[9]], ncol = 2)
 grid.arrange(myplots[[10]],myplots[[11]],myplots[[12]],myplots[[13]], ncol = 2)
 grid.arrange(myplots[[14]],myplots[[15]],myplots[[16]],myplots[[17]], ncol = 2)
 grid.arrange(myplots[[18]],myplots[[19]],myplots[[20]],myplots[[21]],myplots[[22]],myplots[[23]], ncol = 2)
-plot(mushroom$gill_attachment)
+      
 
 
 #------------------------------Impotance level
@@ -71,7 +56,7 @@ ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
 #-------------------Importance Levels
 col<-c(2:23)
 secondCol<-c(1:23)
-secondCol<-secondCol[-4]
+secondCol<-secondCol[-8]
 proportions_tab <- ComputeProportion(mushroom[,1],mushroom,col,0.482)
 
 
@@ -79,11 +64,9 @@ barplot(as.numeric(proportions_tab[,3]), ylab="Importance Level for edibility",
        names.arg=proportions_tab[,1],
         border="blue", col=rainbow(3),las=2)
 #for second target
-length(levels(mushroom[,5]))
-
-proportions_tab <- ComputeProportion(mushroom[,5],mushroom,secondCol,0.415)
+proportions_tab <- ComputeProportion(mushroom[,8],mushroom,secondCol,0.161)
 print(proportions_tab)
-barplot(as.numeric(proportions_tab[,3]), ylab="Importance Level for bruises", 
+barplot(as.numeric(proportions_tab[,3]), ylab="Importance Level for gill spacing", 
         names.arg=proportions_tab[,1],
         border="blue", col=rainbow(3),las=2)
 
