@@ -170,7 +170,9 @@ for(i in c(1:20)){
 }
 
 print(ntreeAccuracy)
-plot(unlist(ntreeAccuracy))
+
+
+plot(unlist(ntreeAccuracy), type="o" , bty="l" , xlab="Accuracy" , ylab="ntreeValues" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
 meanNtreeAccuracy <- lapply(ntreeAccuracy, mean)
 ntreeMax <- which.max(as.vector(unlist(meanNtreeAccuracy)))
 
@@ -197,7 +199,7 @@ rf_mtry <- train(edibility~.,
                  do.trace = TRUE, ## is given about of randomForest.
                  ntree = ntreeMax)
 print(rf_mtry)
-plot(rf_mtry)
+plot(rf_mtry, type="o" , bty="l" , xlab="Accuracy" , ylab="mtry Values" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
 rf_mtry$results$Accuracy
 mean(rf_mtry$results$Accuracy)
 tuneGrid <- expand.grid(.mtry = rf_mtry$bestTune$mtry )
@@ -216,7 +218,7 @@ PrecisionList <- c()
 store_maxnode <- list()
 indexes <- c()
 for (maxnodes in c(5: 15)) {
-  set.seed(1234)
+  set.seed(579642)
   rf_maxnode <- train(edibility~.,
                       data = data_train,
                       method = "rf",
@@ -256,11 +258,13 @@ RecallList
 F_ScoreList 
 PrecisionList
 
-plot(AccuracyList, type="o", pch=22, lty=2, col="red")
-plot(AccuracyList)
-plot(RecallList)
-plot(F_ScoreList)
-plot(PrecisionList)
+plot(AccuracyList, type="o" , bty="l" , xlab="maxNodeValues" , ylab="Accuracy" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(RecallList, type="o" , bty="l" , xlab="maxNodeValues" , ylab="RecallList" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(F_ScoreList, type="o" , bty="l" , xlab="maxNodeValues" , ylab="F_ScoreList" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(PrecisionList, type="o" , bty="l" , xlab="maxNodeValues" , ylab="PrecisionList" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+
+
+
 
 mean(AccuracyList)
 mean(RecallList)
@@ -299,7 +303,7 @@ maxnodes <- indexes[maxnodes]
 
 
 
-model_rf <- randomForest(edibility ~ . , data = data_train, importance = TRUE)
+model_rf <- randomForest(edibility ~ . , data = data_train, importance = TRUE, maxnodes=maxnodes, ntree=ntreeMax, mtry=tuneGrid$.mtry)
 print(model_rf)
 caret::confusionMatrix(data = model_rf$predicted, reference = data_train$edibility , 
                        positive = "edible")
