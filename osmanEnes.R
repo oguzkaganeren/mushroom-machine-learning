@@ -267,6 +267,7 @@ mean(RecallList)
 mean(F_ScoreList)
 mean(PrecisionList)
 
+print("asd")
 
 meanMaxnodesAccuracies <- lapply(store_maxnode, mean)
 maxnodes <- which.max(as.vector(unlist(meanMaxnodesAccuracies)))
