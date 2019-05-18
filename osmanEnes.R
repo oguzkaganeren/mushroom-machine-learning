@@ -232,7 +232,7 @@ for (maxnodes in c(5: 15)) {
   current_iteration <- toString(maxnodes)
   store_maxnode[[current_iteration]] <- rf_maxnode$results$Accuracy
   indexes <- c(indexes,maxnodes)
-  print(maxnodes)s
+  print(maxnodes)
   prediction <-predict(rf_maxnode, data_test)
   confusion_matrix <- confusionMatrix(prediction, data_test$edibility)
   confusion_matrix
