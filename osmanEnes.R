@@ -172,7 +172,7 @@ for(i in c(1:20)){
 print(ntreeAccuracy)
 
 
-plot(unlist(ntreeAccuracy), type="o" , bty="l" , xlab="Accuracy" , ylab="ntreeValues" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(unlist(ntreeAccuracy), type="o" , bty="l" , xlab="ntreeValues" , ylab="Accuracy" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
 meanNtreeAccuracy <- lapply(ntreeAccuracy, mean)
 ntreeMax <- which.max(as.vector(unlist(meanNtreeAccuracy)))
 
@@ -189,7 +189,7 @@ print(paste("running time => ", (end_time-start_time)))
 
 
 ############################# for mtry.
-tuneGrid <- expand.grid(.mtry = c(1: 10))
+tuneGrid <- expand.grid(.mtry = c(1: 6))
 rf_mtry <- train(edibility~.,
                  data = data_train,
                  method = "rf",
@@ -199,7 +199,7 @@ rf_mtry <- train(edibility~.,
                  do.trace = TRUE, ## is given about of randomForest.
                  ntree = ntreeMax)
 print(rf_mtry)
-plot(rf_mtry, type="o" , bty="l" , xlab="Accuracy" , ylab="mtry Values" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(rf_mtry, type="o" , bty="l" , xlab="mtry Values" , ylab="Accuracy" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
 rf_mtry$results$Accuracy
 mean(rf_mtry$results$Accuracy)
 tuneGrid <- expand.grid(.mtry = rf_mtry$bestTune$mtry )
@@ -224,7 +224,6 @@ for (maxnodes in c(5: 15)) {
                       method = "rf",
                       metric = "Accuracy",
                       trControl = trControl,
-                      
                       tuneGrid = tuneGrid,
                       importance = TRUE,
                       nodesize = 14,
@@ -233,7 +232,7 @@ for (maxnodes in c(5: 15)) {
   current_iteration <- toString(maxnodes)
   store_maxnode[[current_iteration]] <- rf_maxnode$results$Accuracy
   indexes <- c(indexes,maxnodes)
-  print(maxnodes)
+  print(maxnodes)s
   prediction <-predict(rf_maxnode, data_test)
   confusion_matrix <- confusionMatrix(prediction, data_test$edibility)
   confusion_matrix
