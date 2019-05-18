@@ -3,7 +3,7 @@ url_file <-  "https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom
 mushroom <- read.csv(url(url_file), header=FALSE)
 glimpse(mushroom)
 
-colNames <- c("edibility", "cap_shape", "cap_surface", 
+colNames <- c("class", "cap_shape", "cap_surface", 
                         "cap_color", "bruises", "odor", 
                         "gill_attachement", "gill_spacing", "gill_size", 
                         "gill_color", "stalk_shape", "stalk_root", 
@@ -15,7 +15,7 @@ colnames(mushroom) <- colNames
 mushroom <- mushroom %>% map_df(function(.x) as.factor(.x))
 
 ## We redefine each of the category for each of the variables
-levels(mushroom$edibility) <- c("edible", "poisonous")
+levels(mushroom$class) <- c("edible", "poisonous")
 levels(mushroom$cap_shape) <- c("bell", "conical", "flat", "knobbed", "sunken", "convex")
 levels(mushroom$cap_color) <- c("buff", "cinnamon", "red", "gray", "brown", "pink", 
                                 "green", "purple", "white", "yellow")
@@ -47,93 +47,26 @@ levels(mushroom$habitat) <- c("wood", "grasses", "leaves", "meadows", "paths", "
 glimpse(mushroom)
 
 
-number_class <- function(x){
-  x <- length(levels(x))
-}
 
-x <- mushroom %>% map_dbl(function(.x) number_class(.x)) %>% as_tibble() %>% 
-  rownames_to_column() %>% arrange(desc(value))
-colnames(x) <- c("Variable name", "Number of levels")
-print(x)
-
-
-drops <- c("veil_type") #there is one unique values of veil_type
-mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type
-# remove unncessary data
-rm(drops)
-
-map_dbl(mushroom, function(.x) {sum(is.na(.x))})
-
-#install.packages("Amelia")
-#install.packages("caret")
-library(arm)
-library(caret)
-library(purrr)
-library(Amelia)
-
-sums <- NULL
-for(i in 1:length(mushroom)){
-  sums <- c(sums, sum(is.na(mushroom[,i])))
-}
-colNames <-  colNames[!colNames %in% "veil_type"]
-
-numMissData <- data.frame("column" = colNames, "numberOfMissingData" = sums )
-missmap(mushroom, main = "Missing values vs observed") # plot missing data distrubition
-rm(i, sums)
-
-map_dbl(mushroom, function(.x) {sum(is.na(.x))})
-
-
-
-Mode <- function (x, na.rm) {
-  xtab <- table(x)
-  xmode <- names(which(xtab == max(xtab)))
-  if (length(xmode) > 1) xmode <- ">1 mode"
-  return(xmode)
-}
-for (var in 1:ncol(mushroom)) {
-  mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-}
-
-#after data preparation of missing values.
-#missmap(mushroom, main = "After data preparation of missing values")
-#ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
-#  len_attr <- length(Columns)
-#  RMSE <- NULL
-#  for(i in 1:len_attr){
-#    tab <- table(target,attribute_dataset[,Columns[i]])
-#    prop <- tab[2,]/(tab[1,]+tab[2,])
-#    centr_prop <- prop - centroid
-#    Err <- sqrt(mean(centr_prop*centr_prop))
-#    RMSE <-rbind(RMSE,Err)
-#  }
-#  norm_err <- (RMSE-min(RMSE))/(max(RMSE)-min(RMSE))
-#  err_mat <- cbind(colnames(mushroom[,Columns]),RMSE)
-#  err_mat <- cbind(err_mat,norm_err)
-#  colnames(err_mat) <- c("Column name","RMSE","Norm. Error")
-#  err_mat
-#}
-#proportions_tab <- ComputeProportion(mushroom[,1],mushroom,c(2:23),0.482)
-#print(proportions_tab)
-
+source(file = "Preparation.R") # just shows worked dataset after data preparation.
 #################################################### Virtualize the mushroom
 
 library(ggplot2)
-ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = edibility)) + 
+ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
 
-ggplot(mushroom, aes(x = cap_shape, y = cap_color, col = edibility)) + 
+ggplot(mushroom, aes(x = cap_shape, y = cap_color, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
-ggplot(mushroom, aes(x = gill_color, y = cap_color, col = edibility)) + 
+ggplot(mushroom, aes(x = gill_color, y = cap_color, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
 
-ggplot(mushroom, aes(x = edibility, y = odor, col = edibility)) + 
+ggplot(mushroom, aes(x = class, y = odor, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("green", "red"))
@@ -159,7 +92,7 @@ start_time <- Sys.time()
 ntreeAccuracy <- list()
 for(i in c(1:20)){
   set.seed(579642)
-  rf_ntree <- train(edibility~.,
+  rf_ntree <- train(class~.,
                    data = data_train,
                    method = "rf",
                    metric = "Accuracy",
@@ -172,25 +105,15 @@ for(i in c(1:20)){
 print(ntreeAccuracy)
 
 
-plot(unlist(ntreeAccuracy), type="o" , bty="l" , xlab="Accuracy" , ylab="ntreeValues" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(unlist(ntreeAccuracy), type="o" , bty="l" , ylab="Accuracy" , xlab="ntreeValues" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
 meanNtreeAccuracy <- lapply(ntreeAccuracy, mean)
 ntreeMax <- which.max(as.vector(unlist(meanNtreeAccuracy)))
 
-end_time <- Sys.time()
-
-print(paste("running time => ", (end_time-start_time)))
-
-
-
-
-
-
-
-
-
 ############################# for mtry.
-tuneGrid <- expand.grid(.mtry = c(1: 10))
-rf_mtry <- train(edibility~.,
+
+### mtry value continue as 1 after the 6.
+tuneGrid <- expand.grid(.mtry = c(1: 6))
+rf_mtry <- train(class~.,
                  data = data_train,
                  method = "rf",
                  metric = "Accuracy",
@@ -199,7 +122,7 @@ rf_mtry <- train(edibility~.,
                  do.trace = TRUE, ## is given about of randomForest.
                  ntree = ntreeMax)
 print(rf_mtry)
-plot(rf_mtry, type="o" , bty="l" , xlab="Accuracy" , ylab="mtry Values" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
+plot(rf_mtry, type="o" , bty="l" , ylab="Accuracy" , xlab="mtry Values" , col=rgb(0.1,0.5,0.1,0.8) , lwd=0.5 , pch=16  )
 rf_mtry$results$Accuracy
 mean(rf_mtry$results$Accuracy)
 tuneGrid <- expand.grid(.mtry = rf_mtry$bestTune$mtry )
@@ -219,7 +142,7 @@ store_maxnode <- list()
 indexes <- c()
 for (maxnodes in c(5: 15)) {
   set.seed(579642)
-  rf_maxnode <- train(edibility~.,
+  rf_maxnode <- train(class~.,
                       data = data_train,
                       method = "rf",
                       metric = "Accuracy",
@@ -235,7 +158,7 @@ for (maxnodes in c(5: 15)) {
   indexes <- c(indexes,maxnodes)
   print(maxnodes)
   prediction <-predict(rf_maxnode, data_test)
-  confusion_matrix <- confusionMatrix(prediction, data_test$edibility)
+  confusion_matrix <- confusionMatrix(prediction, data_test$class)
   confusion_matrix
   TP <- confusion_matrix$table[2,2]
   TN <- confusion_matrix$table[1,1]
@@ -278,39 +201,8 @@ maxnodes <- which.max(as.vector(unlist(meanMaxnodesAccuracies)))
 maxAccuracy <- max(as.vector(unlist(meanMaxnodesAccuracies)))
 maxnodes <- indexes[maxnodes]
 
+end_time <- Sys.time()
+
+print(paste("running time => ", (end_time-start_time)))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-model_rf <- randomForest(edibility ~ . , data = data_train, importance = TRUE, maxnodes=maxnodes, ntree=ntreeMax, mtry=tuneGrid$.mtry)
-print(model_rf)
-caret::confusionMatrix(data = model_rf$predicted, reference = data_train$edibility , 
-                       positive = "edible")
-varImpPlot(model_rf, sort = TRUE, 
-           n.var = 10, main = "The 10 variables with the most predictive power")
-
-test_rf <- predict(model_rf, newdata = data_test)
-
-# Quick check on our prediction
-table(test_rf, data_test$edibility)
