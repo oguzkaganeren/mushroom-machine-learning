@@ -1,10 +1,6 @@
-mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE) # load dataset
+mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE,na.strings=c("?","NA")) # load dataset
 #show missing data in a table
-sums <- NULL
-for(i in 1:length(mushroom)){
-  sums <- c(sums, sum(is.na(mushroom[,i])))
-}
-numMissData <- data.frame("column" = columnNames, "numberOfMissingData" = sums )
+any(is.na(mushroom))#missing değer var ise true döner
 missmap(mushroom, main = "Missing values vs observed") # plot missing data distrubition
 rm(i, sums, numMissData)
 
@@ -46,3 +42,4 @@ grid.arrange(myplots[[6]],myplots[[7]],myplots[[8]],myplots[[9]], ncol = 2)
 grid.arrange(myplots[[10]],myplots[[11]],myplots[[12]],myplots[[13]], ncol = 2)
 grid.arrange(myplots[[14]],myplots[[15]],myplots[[16]],myplots[[17]], ncol = 2)
 grid.arrange(myplots[[18]],myplots[[19]],myplots[[20]],myplots[[21]],myplots[[22]],myplots[[23]], ncol = 2)
+plot(mushroom$gill_attachment)

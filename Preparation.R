@@ -1,20 +1,34 @@
-mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE) # load dataset
+mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE,na.strings=c("?","NA")) # load dataset
+
 #replace NA values to columns mode  
-#Mode <- function (x, na.rm) {
-#  xtab <- table(x)
-#  xmode <- names(which(xtab == max(xtab)))
-#  if (length(xmode) > 1) xmode <- ">1 mode"
-#  return(xmode)
-#}
+Mode <- function (x, na.rm) {
+  xtab <- table(x)
+  xmode <- names(which(xtab == max(xtab)))
+  if (length(xmode) > 1) xmode <- ">1 mode"
+  return(xmode)
+}
+for (var in 1:ncol(mushroom)) {
+  mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
+}
 
-#for (var in 1:ncol(mushroom)) {
-#  mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
-#}
+#--------------------
+#doğal değerlerini buluyoruz proportion kısmında lazım olacak
+class_count <- table(mushroom$class)
+class_proportion <- class_count[2]/(class_count[1]+class_count[2])
+print("Natural poison rate->")
+class_proportion
 
 
-#after data preparation of missing values.
-#missmap(mushroom, main = "After data preparation of missing values")
-#Centroid parametresi, en uygun oluşum değerini gösterir.
+class_count <- table(mushroom$bruises)
+class_proportion <- class_count[2]/(class_count[1]+class_count[2])
+print("Natural buises rate->")
+class_proportion
+
+
+
+#dönen değer ne kadar büyükse sınıflandırma için o kadar önemlidir.
+#columns target dışında yer alan diğer attributesları alır
+#parametre olarak verilen centroid değeri dogal posion değeridir
 ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
   len_attr <- length(Columns)
   RMSE <- NULL
@@ -37,9 +51,10 @@ secondCol<-secondCol[-4]
 proportions_tab <- ComputeProportion(mushroom[,1],mushroom,col,0.482)
 print(proportions_tab)
 #for second target
-proportions_tab <- ComputeProportion(mushroom[,5],mushroom,secondCol,0.482)
+proportions_tab <- ComputeProportion(mushroom[,5],mushroom,secondCol,0.415)
 print(proportions_tab)
-#stalk_shape ve veil_type en düşük değere sahip
+#neden iki tanesini çıkardık(norm err. 0.5 altında kalıyor ikisinde de ondan dolayı)
+#stalk_shape ve veil_type en düşük değere sahip(iki target içinde)
 drops <- c("veil_type","stalk_shape") #there is one unique values of veil_type, stalk_shape we can remove this column in our dataset.
 mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type,stalk_shape
 
