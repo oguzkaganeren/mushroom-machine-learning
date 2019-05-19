@@ -1,4 +1,5 @@
-mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE) # load dataset
+mushroom <- read.csv("agaricus-lepiota.csv",header = TRUE,na.strings=c("?","NA")) # load dataset
+
 #replace NA values to columns mode  
 Mode <- function (x, na.rm) {
   xtab <- table(x)
@@ -10,8 +11,24 @@ for (var in 1:ncol(mushroom)) {
   mushroom[is.na(mushroom[,var]),var] <- Mode(mushroom[,var], na.rm = TRUE)
 }
 
-#after data preparation of missing values.
-missmap(mushroom, main = "After data preparation of missing values")
+#--------------------
+#doğal değerlerini buluyoruz proportion kısmında lazım olacak
+class_count <- table(mushroom$class)
+class_proportion <- class_count[2]/(class_count[1]+class_count[2])
+print("Natural poison rate->")
+class_proportion
+
+
+class_count <- table(mushroom$gill_spacing)
+class_proportion <- class_count[2]/(class_count[1]+class_count[2])
+print("Natural buises rate->")
+class_proportion
+
+
+
+#dönen değer ne kadar büyükse sınıflandırma için o kadar önemlidir.
+#columns target dışında yer alan diğer attributesları alır
+#parametre olarak verilen centroid değeri dogal posion değeridir
 ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
   len_attr <- length(Columns)
   RMSE <- NULL
@@ -28,8 +45,10 @@ ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
   colnames(err_mat) <- c("Column name","RMSE","Norm. Error")
   err_mat
 }
-
-proportions_tab <- ComputeProportion(mushroom[,1],mushroom,c(2:23),0.482)
+col<-c(2:23)
+secondCol<-c(1:23)
+secondCol<-secondCol[-4]
+proportions_tab <- ComputeProportion(mushroom[,1],mushroom,col,0.482)
 print(proportions_tab)
 #neden iki tanesini çıkardık(norm err. 0.5 altında kalıyor ikisinde de ondan dolayı)
 #NA değerler var, bunun sebebi birden fazla attribute un iyi bir şekilde eşleşmesi
