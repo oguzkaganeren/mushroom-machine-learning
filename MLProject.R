@@ -4,6 +4,7 @@ library(arm)
 library(caret)
 library(purrr)
 library(Amelia)
+library(pROC)
 #include data preparation file
 source(file = "Preparation.R") # just shows worked dataset after data preparation.
 
@@ -13,27 +14,31 @@ NUM_OF_FOLD = 10
 TRAIN_DATA  = list()
 
 #show current dataset
-#head(mushroom)
+#head(mushroom)     
 #summary(mushroom)
 
-set.seed(5)  #Set the seed for reproducibility
-for(i in 1:(NUM_OF_FOLD+1)){
-  train_index <- sample(1:nrow(mushroom), size=nrow(mushroom)*TRAIN_SIZE) # randomly choice rows
-  TRAIN_DATA <- c(TRAIN_DATA, list(train_index))
-}
+set.seed(14536)  #Set the seed for reproducibility
+
+#Create 10 equally size folds
+folds <- cut(seq(1,nrow(mushroom)),breaks=NUM_OF_FOLD,labels=FALSE)
+
 
 #begin the logistic function (Model fitting)
 AccList <- NULL
 RecList <- NULL
 FscList <- NULL
 PrcList <- NULL
+SnvList <- NULL
+SpcList <- NULL
+RnnTime <- NULL
 
 
 for(i in 1:(NUM_OF_FOLD)){
 
-  temp_index <- unlist(TRAIN_DATA[i])
-  test  <- mushroom[-temp_index,]
-  train <- mushroom[temp_index,]
+  #Segement your data by fold using the which() function 
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  test <- mushroom[testIndexes, ]
+  train <- mushroom[-testIndexes, ]
 
   start_time <- Sys.time()
   model <- glm(gill_spacing ~ ., data = train,family = binomial,maxit = 100)
@@ -79,21 +84,21 @@ TRAIN_DATA  = list()
 #begin the logistic function (Model fitting)
 set.seed(48425)  #Set the seed for reproducibility
 
-for(i in 1:(NUM_OF_FOLD+1)){
-  train_index <- sample(1:nrow(mushroom), size=nrow(mushroom)*TRAIN_SIZE) # randomly choice rows
-  TRAIN_DATA <- c(TRAIN_DATA, list(train_index))
-}
+
 
 AccList <- NULL
 RecList <- NULL
 FscList <- NULL
 PrcList <- NULL
-
+SnvList <- NULL
+SpcList <- NULL
+RnnTime <- NULL
 
 for(i in 1:(NUM_OF_FOLD)){
-  temp_index <- unlist(TRAIN_DATA[i])
-  test  <- mushroom[-temp_index,]
-  train <- mushroom[temp_index,]
+  #Segement your data by fold using the which() function 
+  testIndexes <- which(folds==i,arr.ind=TRUE)
+  test <- mushroom[testIndexes, ]
+  train <- mushroom[-testIndexes, ]
   
   start_time <- Sys.time()
   model <- glm(class ~ ., data = train,family = binomial ,maxit = 100)
@@ -102,9 +107,9 @@ for(i in 1:(NUM_OF_FOLD)){
   #şimdi modeli test datamız üzerinde test ediyoruz
   predicted <- predict.glm(model,newdata = test[,-1],type = "response")
   #tahmin edilen değerlerin 0.5 üzeri olanlar poison
-  predicted <- predicted >= 0.5
-  predicted <- gsub("TRUE","p",predicted)
-  predicted <- gsub("FALSE","e",predicted)
+  predicted <- predicted >= mean(predicted)
+  predicted <- gsub("TRUE","poisonous",predicted)
+  predicted <- gsub("FALSE","edible",predicted)
   
   actual <- test[,1]
   
@@ -125,15 +130,35 @@ for(i in 1:(NUM_OF_FOLD)){
   RecList <- c(RecList, Recall)
   FscList <- c(FscList, F_Score)
   PrcList <- c(PrcList, Precision)
+  SnvList <- c(SnvList,Sens)
+  SpcList <- c(SpcList,Spec)
+  RnnTime <- c(RnnTime,(end_time-start_time))
+  
+  
   
   print(paste(i, "-> running time => ", (end_time-start_time), "Accuracy : ", Accuracy,
               " Recall : ", Recall
               ," F-Score : ", F_Score
-              ," Precision : ", Precision))
+              ," Precision : ", Precision
+              ,"Sensivity : ",Sens
+              ,"Specificity : ",Spec))
   
   
 }
+#Draw data
+library(ggplot2)
+library(gridExtra)
+plot(RnnTime,type = "o", ylab="Running time", xlab =mean(RnnTime),
+     border="blue", col=rainbow(3))
 
+plot(AccList,type = "o", ylab="Accuracy Rate", xlab =mean(AccList),
+        border="blue", col=rainbow(3))
+plot(RecList,type = "o", ylab="Recall Rate", xlab =mean(RecList),
+     border="blue", col=rainbow(3))
+plot(FscList,type = "o", ylab="F-Score Rate", xlab =mean(FscList),
+     border="blue", col=rainbow(3))
+plot(PrcList,type = "o", ylab="Precision Rate", xlab =mean(PrcList),
+     border="blue", col=rainbow(3))
 #ROC Curve
 #install.packages("ROCR")
 #library(ROCR)
