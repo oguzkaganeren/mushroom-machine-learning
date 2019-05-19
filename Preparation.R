@@ -11,7 +11,7 @@ for (var in 1:ncol(mushroom)) {
 }
 
 #after data preparation of missing values.
-#missmap(mushroom, main = "After data preparation of missing values")
+missmap(mushroom, main = "After data preparation of missing values")
 ComputeProportion <- function(target,attribute_dataset,Columns,centroid){
   len_attr <- length(Columns)
   RMSE <- NULL
@@ -42,26 +42,17 @@ rm(drops)
 
 
 
-colNames <- c("edibility", "cap_shape", "cap_surface", 
-              "cap_color", "bruises", "odor", 
-              "gill_attachement", "gill_spacing", "gill_size", 
-              "gill_color", "stalk_shape", "stalk_root", 
-              "stalk_surface_above_ring", "stalk_surface_below_ring", "stalk_color_above_ring", 
-              "stalk_color_below_ring", "veil_type", "veil_color", 
-              "ring_number", "ring_type", "spore_print_color", 
-              "population", "habitat")
-colnames(mushroom) <- colNames
 mushroom <- mushroom %>% map_df(function(.x) as.factor(.x))
 
 ## We redefine each of the category for each of the variables
-levels(mushroom$edibility) <- c("edible", "poisonous")
+levels(mushroom$class) <- c("edible", "poisonous")
 levels(mushroom$cap_shape) <- c("bell", "conical", "flat", "knobbed", "sunken", "convex")
 levels(mushroom$cap_color) <- c("buff", "cinnamon", "red", "gray", "brown", "pink", 
                                 "green", "purple", "white", "yellow")
 levels(mushroom$cap_surface) <- c("fibrous", "grooves", "scaly", "smooth")
 levels(mushroom$bruises) <- c("no", "yes")
 levels(mushroom$odor) <- c("almond", "creosote", "foul", "anise", "musty", "none", "pungent", "spicy", "fishy")
-levels(mushroom$gill_attachement) <- c("attached", "free")
+levels(mushroom$gill_attachment) <- c("attached", "free")
 levels(mushroom$gill_spacing) <- c("close", "crowded")
 levels(mushroom$gill_size) <- c("broad", "narrow")
 levels(mushroom$gill_color) <- c("buff", "red", "gray", "chocolate", "black", "brown", "orange", 
