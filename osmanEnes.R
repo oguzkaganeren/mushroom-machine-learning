@@ -1,3 +1,11 @@
+#install.packages("Amelia")
+#install.packages("caret")
+library(arm)
+library(caret)
+library(purrr)
+library(Amelia)
+library(pROC)
+
 source(file = "Preparation.R") # just shows worked dataset after data preparation.
 #################################################### Virtualize the mushroom
 
@@ -156,3 +164,4 @@ end_time <- Sys.time()
 print(paste("running time => ", (end_time-start_time)))
 
 ## end.
+
