@@ -41,7 +41,7 @@ for(i in 1:(NUM_OF_FOLD)){
   train <- mushroom[-testIndexes, ]
 
   start_time <- Sys.time()
-  model <- glm(gill_spacing ~ ., data = train,family = binomial,maxit = 100)
+  model <- bayesglm(gill_spacing ~ ., data = train,family = binomial,maxit = 100)
   #summary(model)
   
   #şimdi modeli test datamız üzerinde test ediyoruz
@@ -125,6 +125,8 @@ for(i in 1:(NUM_OF_FOLD)){
   Recall <- TP*100/(TP+FN)
   F_Score <- 2*TP*100/(2*TP+FP+FN)
   Precision <- TP*100/(TP+FP)
+  Sens <- TP*100/(TP+FN)
+  Spec <- TN*100/(TN+FP)
   end_time <- Sys.time()
   AccList <- c(AccList, Accuracy)
   RecList <- c(RecList, Recall)
