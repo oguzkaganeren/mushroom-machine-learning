@@ -34,86 +34,86 @@ RnnTime <- NULL
 
 
 for(i in 1:(NUM_OF_FOLD)){
-
+  
   #Segement your data by fold using the which() function 
   testIndexes <- which(folds==i,arr.ind=TRUE)
   test <- mushroom[testIndexes, ]
   train <- mushroom[-testIndexes, ]
-
-start_time <- Sys.time()
-model = glm(formula = gill_size ~ ., data = train, family = binomial())
-#summary(model)
-#NA değerler var, bunun sebebi birden fazla attribute un iyi bir şekilde eşleşmesi
-#bu durumu istemiyoruz o yüzden NA'lı attributeları kaldırıyoruz
-drops <- c("stalk_color_above_ring","stalk_color_below_ring","veil_color","ring_number"
-           ,"ring_type","spore_print_color","habitat") #we remove this column in our dataset.
-train <- train[ , !(names(train) %in% drops)] #remove
-test <- test[ , !(names(test) %in% drops)] #remove
-#Warning: glm.fit: algorithm did not converge hatası iterasyon sayısı ile ilgili
-#default olarak maxit=25'dir biz 100 yapıyoruz
-model <- glm(gill_size ~ ., data = train,family = binomial,maxit = 100)
-
-#summary(model)
-
-#şimdi modeli test datamız üzerinde test ediyoruz
-
-predicted <- predict.glm(model,newdata = test[,-9],type = "response")
-#tahmin edilen değerler ortalama üzeri olanlar poison
-
-predicted <- predicted >= mean(predicted)
-predicted <- gsub("FALSE","broad",predicted)
-predicted <- gsub("TRUE","narrow",predicted)
-
-actual <- test[,9]
-
-train_err <- mean(predicted != train$bruises)
-confusion_matrix <- table(predicted,actual)
-TP <- confusion_matrix[2,2]
-TN <- confusion_matrix[1,1]
-FP <- confusion_matrix[2,1]
-FN <- confusion_matrix[1,2]
-Accuracy <- (TP+TN)*100/(TP+TN+FP+FN)
-Recall <- TP*100/(TP+FN)
-F_Score <- 2*TP*100/(2*TP+FP+FN)
-Precision <- TP*100/(TP+FP)
-Sens <- TP*100/(TP+FN)
-Spec <- TN*100/(TN+FP)
-end_time <- Sys.time()
-AccList <- c(AccList, Accuracy)
-RecList <- c(RecList, Recall)
-FscList <- c(FscList, F_Score)
-PrcList <- c(PrcList, Precision)
-SnvList <- c(SnvList,Sens)
-SpcList <- c(SpcList,Spec)
-RnnTime <- c(RnnTime,(end_time-start_time))
-
-
-
-print(paste(i, "-> running time => ", (end_time-start_time), "Accuracy : ", Accuracy,
-            " Recall : ", Recall
-            ," F-Score : ", F_Score
-            ," Precision : ", Precision
-            ,"Sensivity : ",Sens
-            ,"Specificity : ",Spec))
-
-
-# Calculate sensitivity and false positive measures for logit model
-
-
+  
+  start_time <- Sys.time()
+  model = glm(formula = gill_spacing ~ ., data = train, family = binomial())
+  #summary(model)
+  #NA değerler var, bunun sebebi birden fazla attribute un iyi bir şekilde eşleşmesi
+  #bu durumu istemiyoruz o yüzden NA'lı attributeları kaldırıyoruz
+  drops <- c("stalk_color_above_ring","stalk_color_below_ring","veil_color","ring_number"
+             ,"ring_type","spore_print_color","habitat") #we remove this column in our dataset.
+  train <- train[ , !(names(train) %in% drops)] #remove
+  test <- test[ , !(names(test) %in% drops)] #remove
+  #Warning: glm.fit: algorithm did not converge hatası iterasyon sayısı ile ilgili
+  #default olarak maxit=25'dir biz 100 yapıyoruz
+  model <- glm(gill_spacing ~ ., data = train,family = binomial,maxit = 100)
+  
+  #summary(model)
+  
+  #şimdi modeli test datamız üzerinde test ediyoruz
+  
+  predicted <- predict.glm(model,newdata = test[,-8],type = "response")
+  #tahmin edilen değerler ortalama üzeri olanlar poison
+  
+  predicted <- predicted >= mean(predicted)
+  predicted <- gsub("FALSE","close",predicted)
+  predicted <- gsub("TRUE","crowded",predicted)
+  
+  actual <- test[,8]
+  
+  train_err <- mean(predicted != train$bruises)
+  confusion_matrix <- table(predicted,actual)
+  TP <- confusion_matrix[2,2]
+  TN <- confusion_matrix[1,1]
+  FP <- confusion_matrix[2,1]
+  FN <- confusion_matrix[1,2]
+  Accuracy <- (TP+TN)*100/(TP+TN+FP+FN)
+  Recall <- TP*100/(TP+FN)
+  F_Score <- 2*TP*100/(2*TP+FP+FN)
+  Precision <- TP*100/(TP+FP)
+  Sens <- TP*100/(TP+FN)
+  Spec <- TN*100/(TN+FP)
+  end_time <- Sys.time()
+  AccList <- c(AccList, Accuracy)
+  RecList <- c(RecList, Recall)
+  FscList <- c(FscList, F_Score)
+  PrcList <- c(PrcList, Precision)
+  SnvList <- c(SnvList,Sens)
+  SpcList <- c(SpcList,Spec)
+  RnnTime <- c(RnnTime,(end_time-start_time))
+  
+  
+  
+  print(paste(i, "-> running time => ", (end_time-start_time), "Accuracy : ", Accuracy,
+              " Recall : ", Recall
+              ," F-Score : ", F_Score
+              ," Precision : ", Precision
+              ,"Sensivity : ",Sens
+              ,"Specificity : ",Spec))
+  
+  
+  # Calculate sensitivity and false positive measures for logit model
+  
+  
 }
 #Draw data
 library(ggplot2)
 library(gridExtra)
-plot(RnnTime,type = "o", ylab="Running time", xlab =mean(RnnTime),
+plot(RnnTime,type = "o", ylab="Running time for gill_spacing", xlab =mean(RnnTime),
      border="blue", col=rainbow(3))
 
-plot(AccList,type = "o", ylab="Accuracy Rate", xlab =mean(AccList),
+plot(AccList,type = "o", ylab="Accuracy Rate for gill_spacing", xlab =mean(AccList),
      border="blue", col=rainbow(3))
-plot(RecList,type = "o", ylab="Recall Rate", xlab =mean(RecList),
+plot(RecList,type = "o", ylab="Recall Rate for gill_spacing", xlab =mean(RecList),
      border="blue", col=rainbow(3))
-plot(FscList,type = "o", ylab="F-Score Rate", xlab =mean(FscList),
+plot(FscList,type = "o", ylab="F-Score Rate for gill_spacing", xlab =mean(FscList),
      border="blue", col=rainbow(3))
-plot(PrcList,type = "o", ylab="Precision Rate", xlab =mean(PrcList),
+plot(PrcList,type = "o", ylab="Precision Rate for gill_spacing", xlab =mean(PrcList),
      border="blue", col=rainbow(3))
 
 
@@ -203,16 +203,16 @@ for(i in 1:(NUM_OF_FOLD)){
 #Draw data
 library(ggplot2)
 library(gridExtra)
-plot(RnnTime,type = "o", ylab="Running time", xlab =mean(RnnTime),
+plot(RnnTime,type = "o", ylab="Running time for class", xlab =mean(RnnTime),
      border="blue", col=rainbow(3))
 
-plot(AccList,type = "o", ylab="Accuracy Rate", xlab =mean(AccList),
-        border="blue", col=rainbow(3))
-plot(RecList,type = "o", ylab="Recall Rate", xlab =mean(RecList),
+plot(AccList,type = "o", ylab="Accuracy Rate for class", xlab =mean(AccList),
      border="blue", col=rainbow(3))
-plot(FscList,type = "o", ylab="F-Score Rate", xlab =mean(FscList),
+plot(RecList,type = "o", ylab="Recall Rate for class", xlab =mean(RecList),
      border="blue", col=rainbow(3))
-plot(PrcList,type = "o", ylab="Precision Rate", xlab =mean(PrcList),
+plot(FscList,type = "o", ylab="F-Score Rate for class", xlab =mean(FscList),
+     border="blue", col=rainbow(3))
+plot(PrcList,type = "o", ylab="Precision Rate for class", xlab =mean(PrcList),
      border="blue", col=rainbow(3))
 #ROC Curve
 #install.packages("ROCR")
