@@ -10,24 +10,20 @@ source(file = "Preparation.R") # just shows worked dataset after data preparatio
 #################################################### Virtualize the mushroom
 
 library(ggplot2)
-ggplot(mushroom, aes(x = cap_surface, y = cap_color, col = class)) + 
+ggplot(mushroom, aes(x = class, y = odor, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("darkblue", "dimgray"))
 
-ggplot(mushroom, aes(x = cap_shape, y = cap_color, col = class)) + 
+ggplot(mushroom, aes(x = class, y = spore_print_color, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("sienna4", "skyblue1"))
-ggplot(mushroom, aes(x = gill_color, y = cap_color, col = class)) + 
+ggplot(mushroom, aes(x = class, y = cap_color, col = class)) + 
   geom_jitter(alpha = 0.5) + 
   scale_color_manual(breaks = c("edible", "poisonous"), 
                      values = c("brown", "slateblue1"))
 
-ggplot(mushroom, aes(x = class, y = odor, col = class)) + 
-  geom_jitter(alpha = 0.5) + 
-  scale_color_manual(breaks = c("edible", "poisonous"), 
-                     values = c("chocolate", "dimgray"))
 
 ################################################### 
 
