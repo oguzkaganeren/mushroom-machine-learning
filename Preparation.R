@@ -51,11 +51,8 @@ secondCol<-secondCol[-4]
 proportions_tab <- ComputeProportion(mushroom[,1],mushroom,col,0.482)
 print(proportions_tab)
 #neden iki tanesini çıkardık(norm err. 0.5 altında kalıyor ikisinde de ondan dolayı)
-#NA değerler var, bunun sebebi birden fazla attribute un iyi bir şekilde eşleşmesi
-#bu durumu istemiyoruz o yüzden NA'lı attributeları kaldırıyoruz
-drops <- c("veil_type","stalk_shape", "stalk_color_above_ring","stalk_color_below_ring","veil_color","ring_number"
-           ,"ring_type","spore_print_color","habitat") #we remove this column in our dataset.
 #stalk_shape ve veil_type en düşük değere sahip(iki target içinde)
+drops <- c("veil_type","stalk_shape") #there is one unique values of veil_type, stalk_shape we can remove this column in our dataset.
 mushroom <- mushroom[ , !(names(mushroom) %in% drops)] #remove veil_type,stalk_shape
 
 # remove unncessary data
