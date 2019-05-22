@@ -55,7 +55,7 @@ for(i in 1:(NUM_OF_FOLD)){
   
   actual <- test[,8]
   
-  train_err <- mean(predicted != train$bruises)
+  train_err <- mean(predicted != train$gill_spacing)
   confusion_matrix <- table(predicted,actual)
   TP <- confusion_matrix[2,2]
   TN <- confusion_matrix[1,1]
